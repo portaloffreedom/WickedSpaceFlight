@@ -2,18 +2,18 @@
 #include "WickedEngine.h"
 
 
-class TestsRenderer : public RenderPath3D
+class TestsRenderer : public wi::RenderPath3D
 {
-	wiECS::Entity ik_entity = wiECS::INVALID_ENTITY;
+    wi::ecs::Entity asteroid = wi::ecs::INVALID_ENTITY;
 public:
-	void Load() override;
-	void Update(float dt) override;
+    void Load() override;
+    void Update(float dt) override;
 };
 
-class WickedSpaceFlight : public MainComponent
+class WickedSpaceFlight : public wi::Application
 {
-	TestsRenderer renderer;
+    TestsRenderer renderer;
 public:
-	void Initialize() override;
+    void Initialize() override;
 };
 
