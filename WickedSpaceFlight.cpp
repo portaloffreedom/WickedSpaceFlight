@@ -21,29 +21,33 @@ void WickedSpaceFlight::Initialize()
     renderer.init(canvas);
     renderer.Load();
 
-	ActivatePath(&renderer);
+    ActivatePath(&renderer);
 }
 
-void TestsRenderer::Load()
+void WickedSpaceFlightRenderer::Load()
 {
     setSSREnabled(false);
     setReflectionsEnabled(true);
     setFXAAEnabled(false);
 
+    label.Create("Label1");
+    label.SetText("WickedSpaceFlight");
+    label.font.params.h_align = wi::font::WIFALIGN_CENTER;
+    label.SetSize(XMFLOAT2(240,20));
+    GetGUI().AddWidget(&label);
+
     static wi::audio::Sound sound;
     static wi::audio::SoundInstance soundinstance;
+}
 
+void WickedSpaceFlightRenderer::Start()
+{
     // Reset all state that tests might have modified:
     wi::eventhandler::SetVSync(true);
     wi::renderer::SetToDrawGridHelper(false);
     wi::renderer::SetTemporalAAEnabled(false);
-    wi::renderer::ClearWorld(wi::scene::GetScene());
     wi::scene::GetScene().weather = wi::scene::WeatherComponent();
-    this->ClearSprites();
-    this->ClearFonts();
-    if (wi::lua::GetLuaState() != nullptr) {
-        wi::lua::KillProcesses();
-    }
+
     // Reset camera position:
     wi::scene::TransformComponent transform;
     transform.Translate(XMFLOAT3(0, 2.f, -4.5f));
@@ -53,27 +57,24 @@ void TestsRenderer::Load()
     float screenW = GetLogicalWidth();
     float screenH = GetLogicalHeight();
 
-    // This will spawn a sprite with two textures. The first texture is a color texture and it will be animated.
-    //	The second texture is a static image of "hello world" written on it
-    //	Then add some animations to the sprite to get a nice wobbly and color changing effect.
-    //	You can learn more in the Sprite test in RunSpriteTest() function
-
-//     static wi::Sprite sprite;
-//     sprite = wi::Sprite("images/movingtex.png", "images/HelloWorld.png");
-//     sprite.params.pos = XMFLOAT3(screenW / 2, screenH / 2, 0);
-//     sprite.params.siz = XMFLOAT2(200, 100);
-//     sprite.params.pivot = XMFLOAT2(0.5f, 0.5f);
-//     sprite.anim.rot = XM_PI / 4.0f;
-//     sprite.anim.wobbleAnim.amount = XMFLOAT2(0.16f, 0.16f);
-//     sprite.anim.movingTexAnim.speedX = 0;
-//     sprite.anim.movingTexAnim.speedY = 3;
-//     this->AddSprite(&sprite);
-
-    asteroid = wi::ecs::CreateEntity();
+    wi::ecs::Entity asteroids = wi::scene::LoadModel("../Assets/AsteroidTestScene.wiscene");
+    wi::ecs::Entity spaceship = wi::scene::LoadModel("../Assets/spaceship2.wiscene");
+    //wi::scene::LoadModel("/usr/lib/WickedEngine/Content/models/teapot.wiscene");
+    asteroid = wi::scene::GetScene().Entity_FindByName("Asteroid_no_3");
+    player_spaceship = wi::scene::GetScene().Entity_FindByName("spaceship");
 
     RenderPath3D::Load();
+
+//     wi::renderer::SetWireRender(true);
 }
-void TestsRenderer::Update(float dt)
+
+void WickedSpaceFlightRenderer::Update(float dt)
 {
+    wi::scene::TransformComponent *asteroid_transform = wi::scene::GetScene().transforms.GetComponent(asteroid);
+    asteroid_transform->Rotate(XMVECTOR {dt * 5.0f, 0, 0});
+
+    wi::scene::TransformComponent *player_transform = wi::scene::GetScene().transforms.GetComponent(player_spaceship);
+    player_transform->Rotate(XMVectorSet(0,dt,0,1));
+
     RenderPath3D::Update(dt);
 }
